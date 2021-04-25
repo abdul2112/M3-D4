@@ -20,12 +20,7 @@
     //             6) Add a "search bar". When the user types more than 3 chars, you should filter the content of the page to show only the items with a matching name (hint: use .filter method)
     //             7) Allow the user to delete items from the cart list -->
     <style>
-      @media print {
-        #ghostery-tracker-tally {
-          display: none !important;
-        }
-      }
-      /* #shopping-cart {
+      #shopping-cart {
         position: fixed;
         top: 50%;
         left: 0px;
@@ -43,28 +38,42 @@
       #shopping-cart > div {
         opacity: 0;
         transition: all 0.4s;
-        padding: 4em;
-        display: none;
       }
+
       #shopping-cart:hover > div {
         opacity: 1;
-        display: block;
       }
 
       #shopping-cart:hover {
         max-width: unset;
-        max-height: 70vh;
-        overflow-y: scroll;
+        max-height: unset;
       }
 
-      .selected {
+      /* #shopping-cart > div {
+        opacity: 0;
+        transition: all 0.4s;
+        padding: 4em;
+        display: none;
+      } */
+      /* #shopping-cart:hover > div {
+        opacity: 1;
+        display: block;
+      } */
+
+      /* #shopping-cart:hover {
+        max-width: unset;
+        max-height: 70vh;
+        overflow-y: scroll;
+      } */
+
+      /* .selected {
         border: 3px solid green;
       } */
     </style>
   </head>
 
   <body>
-    <header class="p-2 bg-dark text-white fixed-top">
+    <!-- <header class="p-2 bg-dark text-white fixed-top">
       <div class="d-flex flex-wrap justify-content-between align-items-center">
         <h4 class="font-weight-normal">Strive Bookstore</h4>
         <nav class="">
@@ -147,6 +156,44 @@
           </div>
         </div>
       </footer>
+    </div> -->
+
+    <!-- <header class="p-2 bg-dark text-white fixed-top">
+      <div class="d-flex flex-wrap justify-content-between align-items-center">
+        <h4 class="font-weight-normal">Strive Bookstore</h4>
+        <nav class="">
+          <div class="dropdown">
+            <button
+              class="btn btn-danger"
+              type="button"
+              id="CleanCartButton"
+              onclick="CleanCartFun()"
+            >
+              Clean Cart
+            </button>
+            <button
+              class="btn btn-primary dropdown-toggle"
+              type="button"
+              id="cartListButton"
+              data-toggle="dropdown"
+              aria-haspopup="true"
+              aria-expanded="false"
+            >
+              Cart List
+            </button>
+            <div
+              class="dropdown-menu dropdown-menu-right cartList"
+              aria-labelledby="cartListButton"
+            ></div>
+          </div>
+        </nav>
+      </div>
+    </header> -->
+
+    <div id="shopping-cart"></div>
+
+    <div class="container">
+      <div id="books-wrapper" class="row"></div>
     </div>
     <script
       src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
@@ -160,6 +207,10 @@
     ></script>
 
     <script>
+      //             You are creating the "shopping cart experience" for a Online Marketplace.
+      //             You have the list of the available books from the current API:
+      //             https://striveschool-api.herokuapp.com/books
+      //             // What you have to do is:
       //             0) Get all the products from the API using a fetch
       //             1) Display the list of items available on the page using template literals `` and .forEach
       //             2) Add a "add to cart button"
@@ -170,6 +221,70 @@
       //             7) Allow the user to delete items from the cart list
 
       // 0) Get all the products from the API using a fetch
+      const booksWrapper = document.querySelector('#books-wrapper');
+      const shoppingCart = document.querySelector('#shopping-cart');
+
+      window.onload = () => {
+        loadBooks();
+      };
+
+      let shoppingCartList = [];
+      let books = [];
+      function loadBooks() {
+        fetch('https://striveschool-api.herokuapp.com/books')
+          .then((r) => r.json())
+          .then((_books) => {
+            books = _books;
+            console.log(books);
+            displayBooks();
+          })
+          .catch((err) => console.error(err.message));
+      }
+      function displayBooks() {
+        books.forEach((book) => {
+          booksWrapper.innerHTML += `
+          <div class='col-12 col-sm-6 col-md-4 col-lg-3'>
+          <div class="card">
+              <img src="${book.img}" class="card-img-top img-fluid" alt="${
+            book.title
+          }">
+              <div class="card-body">
+                <h5 class="card-title">${book.title}</h5>
+                <p class="card-text">${book.category}</p>
+                <button href="#" class="btn btn-primary" onclick='addToCart('${string(
+                  book.asin
+                )}')'>$${book.price}</button>
+              </div>
+            </div>
+          </div>`;
+        });
+      }
+      function addToCart(asin) {
+        console.log(asin);
+        const book = books.filter((book) => book.asin == asin)[0];
+        // const book = books.find((book) => book.asin == asin);
+        shoppingCartList.push(book);
+        console.log(shoppingCartList);
+
+        refreshShoppingCart();
+      }
+
+      function refreshShoppingCart() {
+        shoppingCart.innerHTML = '';
+
+        shoppingCartList.forEach((book) => {
+          shoppingCart.innerHTML += `
+          <div class='shopping-item'>
+            <div>
+              ${book.title}
+              </div>
+              <div>
+                ${book.price}
+              </div>
+            </div>
+          `;
+        });
+      }
     </script>
   </body>
 </html>
